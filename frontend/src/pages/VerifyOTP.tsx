@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import toast from "react-hot-toast";
@@ -11,6 +11,42 @@ const VerifyOTP = () => {
   const [loading, setLoading] = useState(false);
 
   const [otp, setOtp] = useState("");
+
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
+
+
+  const handleResendOTP = async () => {
+    try {
+      setResendLoading(true);
+
+      const { data } = await api.post("/auth/resend-otp", {
+        email,
+      });
+
+      toast.success(data.message);
+
+      setOtp("");
+      setResendCooldown(60);
+    } catch (error: any) {
+      toast.error(
+        error.response?.data?.message || "Failed to resend OTP"
+      );
+    } finally {
+      setResendLoading(false);
+    }
+  };
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,6 +93,25 @@ const VerifyOTP = () => {
           value={otp}
           onChange={(e) => setOtp(e.target.value)}
         />
+
+        <div className="text-center mt-5">
+          <p className="text-gray-600 text-sm mb-2">
+            Didn't receive the OTP?
+          </p>
+
+          <button
+            type="button"
+            onClick={handleResendOTP}
+            disabled={resendLoading || resendCooldown > 0}
+            className="text-blue-600 font-semibold hover:underline disabled:text-gray-400 disabled:no-underline"
+          >
+            {resendLoading
+              ? "Sending..."
+              : resendCooldown > 0
+                ? `Resend OTP in ${resendCooldown}s`
+                : "Resend Verification OTP"}
+          </button>
+        </div>
 
         <button
           type="submit"

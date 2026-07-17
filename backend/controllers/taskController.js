@@ -3,9 +3,10 @@ import Task from "../models/taskModel.js";
 // ===============================
 // Create Task
 // ===============================
-export const createTaskController = async (req, res) => {
+export const createTaskController = async (req, res, next) => {
   try {
-    const { title, description, status} = req.body;
+
+    const { title, description, status } = req.body;
 
     if (!title || !description) {
       return res.status(400).send({
@@ -18,7 +19,8 @@ export const createTaskController = async (req, res) => {
       title,
       description,
       status,
-      attachment: req.file ? req.file.filename : "",
+      attachment: req.file?.path || "",
+      attachmentId: req.file?.filename || "",
       user: req.user.id,
     });
 
@@ -28,21 +30,17 @@ export const createTaskController = async (req, res) => {
       task,
     });
   } catch (error) {
-    console.log(error);
-
-    res.status(500).send({
-      success: false,
-      message: "Error creating task",
-      error: error.message,
-    });
+     next(error);
   }
 };
 
 // ===============================
 // Get All Tasks
 // ===============================
-export const getTasksController = async (req, res) => {
+export const getTasksController = async (req, res, next) => {
   try {
+   
+
     const { keyword } = req.query;
 
     const page = Number(req.query.page) || 1;
@@ -98,16 +96,13 @@ export const getTasksController = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).send({
-      success: false,
-      message: error.message,
-    });
+     next(error);
   }
 };
 // ===============================
 // Update Task
 // ===============================
-export const updateTaskController = async (req, res) => {
+export const updateTaskController = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { title, description, status } = req.body;
@@ -142,18 +137,12 @@ export const updateTaskController = async (req, res) => {
       task,
     });
   } catch (error) {
-    console.log(error);
-
-    res.status(500).send({
-      success: false,
-      message: "Error updating task",
-      error: error.message,
-    });
+      next(error);
   }
 };
 
 
-export const deleteTaskController = async (req, res) => {
+export const deleteTaskController = async (req, res, next) => {
   try {
     let task;
 
@@ -178,17 +167,11 @@ export const deleteTaskController = async (req, res) => {
       message: "Task deleted successfully",
     });
   } catch (error) {
-    console.log(error);
-
-    res.status(500).send({
-      success: false,
-      message: "Error deleting task",
-      error: error.message,
-    });
+      next(error);
   }
 };
 
-export const dashboardStatsController = async (req, res) => {
+export const dashboardStatsController = async (req, res, next) => {
   try {
     let query = {};
 
@@ -223,9 +206,6 @@ export const dashboardStatsController = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).send({
-      success: false,
-      message: error.message,
-    });
+     next(error);
   }
 };

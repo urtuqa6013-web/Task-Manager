@@ -4,10 +4,11 @@ import cors from "cors";
 import morgan from "morgan";
 import path from "path";
 
+import errorMiddleware from "./middleware/errorMiddleware.js";
+
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js";
-import sendEmail from "./utils/sendEmail.js";
 import userRoutes from "./routes/userRoutes.js";
 
 dotenv.config();
@@ -23,11 +24,14 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/tasks", taskRoutes);
 app.use("/api/v1/users", userRoutes);
 
-app.use("/uploads",express.static("uploads"));
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 app.get("/", (req, res) => {
   res.send("API is running...");
 });
+
+// Global Error Handler
+app.use(errorMiddleware);
 
 const startServer = async () => {
   try {
@@ -37,7 +41,6 @@ const startServer = async () => {
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
-
   } catch (error) {
     console.log("Server Error:", error);
   }

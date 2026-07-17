@@ -21,8 +21,13 @@ const taskSchema = new mongoose.Schema(
       default: "Pending",
     },
 
-  
+
     attachment: {
+      type: String,
+      default: "",
+    },
+
+    attachmentId: {
       type: String,
       default: "",
     },

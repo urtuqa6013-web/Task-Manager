@@ -65,6 +65,9 @@ const Dashboard = () => {
     return () => clearTimeout(timer);
   }, [keyword]);
 
+
+
+
   // ===========================
   // Get Tasks
   // ===========================
@@ -98,8 +101,7 @@ const Dashboard = () => {
 
 
   // Create / Update Task
-
-
+ 
   const createTask = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -112,7 +114,10 @@ const Dashboard = () => {
         });
 
         toast.success("Task Updated");
+        setEditingId("");
       } else {
+
+        
         const formData = new FormData();
 
         formData.append("title", title);
@@ -132,7 +137,7 @@ const Dashboard = () => {
         toast.success("Task Created");
 
       }
-         
+
       setTitle("");
       setDescription("");
       setStatus("Pending");
@@ -411,13 +416,19 @@ const Dashboard = () => {
                 {/* Attachment */}
                 {task.attachment && (
                   <div className="mt-3">
+                    <img
+                      src={task.attachment}
+                      alt="Attachment"
+                      className="w-40 h-40 object-cover rounded-lg border"
+                    />
+
                     <a
-                      href={`http://localhost:5000/uploads/${task.attachment}`}
+                      href={task.attachment}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 underline"
+                      className="block mt-2 text-blue-600 underline"
                     >
-                      📎 View Attachment
+                      Open Full Image
                     </a>
                   </div>
                 )}
@@ -458,17 +469,33 @@ const Dashboard = () => {
                 <div className="flex gap-3 mt-5">
 
                   <button
+                    type="button"
                     onClick={() => {
+                      console.log("Before:", {
+                        editingId,
+                        title,
+                        description,
+                        status,
+                      });
+
                       setEditingId(task._id);
                       setTitle(task.title);
                       setDescription(task.description);
                       setStatus(task.status);
+
+                      setTimeout(() => {
+                        console.log("After Click:", {
+                          editingId,
+                          title,
+                          description,
+                          status,
+                        });
+                      }, 100);
                     }}
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+                    className="bg-blue-500 text-white px-4 py-2 rounded"
                   >
                     Edit
                   </button>
-
                   <button
                     onClick={() => deleteTask(task._id)}
                     className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"

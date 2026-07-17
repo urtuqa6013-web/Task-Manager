@@ -216,6 +216,72 @@ export const forgotPasswordController = async (req, res) => {
   }
 };
 
+export const resendOtpController = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).send({
+        success: false,
+        message: "Email is required",
+      });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).send({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).send({
+        success: false,
+        message: "Email is already verified",
+      });
+    }
+
+    // Generate new OTP
+    const otp = Math.floor(
+      100000 + Math.random() * 900000
+    ).toString();
+
+    // Save OTP and expiry
+    user.otp = otp;
+    user.otpExpire = Date.now() + 10 * 60 * 1000;
+
+    await user.save();
+
+    // Send OTP
+    await sendEmail(
+      email,
+      "Verify Your Email - Task Manager",
+      `
+      <h2>Email Verification</h2>
+      <p>Hello <b>${user.name}</b>,</p>
+      <p>Your new verification OTP is:</p>
+      <h1>${otp}</h1>
+      <p>This OTP will expire in 10 minutes.</p>
+      `
+    );
+
+    res.status(200).send({
+      success: true,
+      message: "Verification OTP resent successfully",
+    });
+
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).send({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 export const verifyOtpController = async (req, res) => {
   try {
     const { email, otp } = req.body;
