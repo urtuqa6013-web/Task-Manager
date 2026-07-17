@@ -3,7 +3,7 @@ import axios from "axios";
 
 
 const api = axios.create({
-  baseURL: "https://backend.skymail.beer/",
+  baseURL: "https://backend.skymail.beer/api/v1",
   withCredentials: true,
 });
 
